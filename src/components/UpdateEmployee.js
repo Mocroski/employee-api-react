@@ -1,27 +1,39 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import EmployeeService from "./services/EmployeeService";
+import React, { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import EmployeeService from "../services/EmployeeService";
 
-const AddEmployee = () => {
+const UpdateEmployee = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
   const [employee, setEmployee] = useState({
-    id: "",
+    id: id,
     firstName: "",
     lastName: "",
     emailId: "",
   });
-
-  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const value = e.target.value;
     setEmployee({ ...employee, [e.target.name]: value });
   };
 
-  const saveEmployee = (e) => {
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await EmployeeService.getEmployeeById(employee.id);
+        setEmployee(response.data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const updateEmployee = (e) => {
     e.preventDefault();
-    EmployeeService.saveEmployee(employee)
+    console.log(employee);
+    EmployeeService.updateEmployee(employee, id)
       .then((response) => {
-        console.log(response);
         navigate("/employeeList");
       })
       .catch((error) => {
@@ -29,23 +41,13 @@ const AddEmployee = () => {
       });
   };
 
-  const reset = (e) => {
-    e.preventDefault();
-    setEmployee({
-      id: "",
-      firstName: "",
-      lastName: "",
-      emailId: "",
-    });
-  };
-
   return (
     <div className="flex max-w-2xl mx-auto shadow border-b">
       <div className="px-8 py-8">
         <div className="font-thin text-2xl tracking-wider">
-          <h1>Add New Employee</h1>
+          <h1>Update Employee</h1>
         </div>
-        <div className="items-center justify-center h-13 w-full my-3">
+        <div className="items-center justify-center h-14 w-full my-4">
           <label className="block text-gray-600 text-sm font-normal">
             First Name
           </label>
@@ -56,7 +58,7 @@ const AddEmployee = () => {
             onChange={(e) => handleChange(e)}
             className="h-10 w-96 border mt-2 px-2 py-2"></input>
         </div>
-        <div className="items-center justify-center h-13 w-full my-4">
+        <div className="items-center justify-center h-14 w-full my-4">
           <label className="block text-gray-600 text-sm font-normal">
             Last Name
           </label>
@@ -67,7 +69,7 @@ const AddEmployee = () => {
             onChange={(e) => handleChange(e)}
             className="h-10 w-96 border mt-2 px-2 py-2"></input>
         </div>
-        <div className="items-center justify-center h-13 w-full my-4">
+        <div className="items-center justify-center h-14 w-full my-4">
           <label className="block text-gray-600 text-sm font-normal">
             Email
           </label>
@@ -81,14 +83,14 @@ const AddEmployee = () => {
 
         <div className="items-center justify-center h-14 w-full my-4 space-x-4 pt-4">
           <button
-            onClick={saveEmployee}
+            onClick={updateEmployee}
             className="rounded text-white font-semibold bg-green-400 hover:bg-green-700 py-2 px-6">
-            Save
+            Update
           </button>
           <button
-            onClick={reset}
+            onClick={() => navigate("/employeeList")}
             className="rounded text-white font-semibold bg-red-400 hover:bg-red-700 py-2 px-6">
-            Clear
+            Cancel
           </button>
         </div>
       </div>
@@ -96,4 +98,4 @@ const AddEmployee = () => {
   );
 };
 
-export default AddEmployee;
+export default UpdateEmployee;
